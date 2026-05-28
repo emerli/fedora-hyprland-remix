@@ -1,0 +1,89 @@
+name: Build ISO
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      fedora_release:
+        description: 'Fedora release version'
+        required: false
+        default: '44'
+        type: string
+
+env:
+  FEDORA_RELEASE: ${{ github.event.inputs.fedora_release || '44' }}
+
+jobs:
+  validate:
+    name: Validate kickstart & lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pykickstart
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install pykickstart
+
+      - name: Validate kickstart syntax
+        run: ksvalidator fedora-hyprland.ks
+
+      - name: Lint shell scripts
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck build.sh scripts/first-login-setup.sh
+
+  build-iso:
+    name: Build Live ISO
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Fedora container
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      - name: Build ISO inside Fedora container
+        run: |
+          sudo podman run --rm --privileged \
+            -v "${PWD}:/workspace:Z" \
+            -w /workspace \
+            docker.io/library/fedora:${{ env.FEDORA_RELEASE }} \
+            bash -c '
+              set -euo pipefail
+              dnf install -y lorax pykickstart curl unzip wget
+              mkdir -p /tmp/fedora-hyprland-remix-build
+              cp -a config /tmp/fedora-hyprland-remix-build/
+              cp -a scripts /tmp/fedora-hyprland-remix-build/
+              cp -a units /tmp/fedora-hyprland-remix-build/
+              mkdir -p output
+              livemedia-creator \
+                --ks /workspace/fedora-hyprland.ks \
+                --no-virt \
+                --project Fedora-Hyprland-Remix \
+                --releasever ${{ env.FEDORA_RELEASE }} \
+                --iso-only \
+                --iso-name Fedora-Hyprland-Remix-${{ env.FEDORA_RELEASE }}.iso \
+                --resultdir /workspace/output \
+                --ram 4096 \
+                --vcpus 4
+            '
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fedora-hyprland-remix-${{ env.FEDORA_RELEASE }}
+          path: output/*.iso
+          retention-days: 30
+          compression-level: 0
