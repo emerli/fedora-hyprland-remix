@@ -28,13 +28,15 @@ Non e una Fedora Spin ufficiale — e una **remix** non ufficiale basata su Fedo
 
 ## Requisiti build locale
 
-- Fedora 44 (o compatibile)
-- Root
-- Pacchetti: `lorax`, `pykickstart`
+- Fedora 44 (o compatibile) con accesso root
+- Pacchetti: `livecd-tools`
 
 ```bash
-sudo dnf install -y lorax pykickstart
+sudo dnf install -y livecd-tools
 ```
+
+> **Nota**: la build ISO richiede una macchina Fedora con accesso root.
+> Non e possibile buildare su GitHub Actions per limiti di virtualizzazione.
 
 ## Build locale
 
@@ -68,7 +70,7 @@ fedora-hyprland-remix/
 ├── build.sh                    # Script build ISO
 ├── Justfile                    # Task runner
 └── .github/workflows/
-    └── build-iso.yml           # CI/CD per build automatico
+    └── ci.yml                  # CI: lint e validazione kickstart
 ```
 
 ## Hyprland COPR
