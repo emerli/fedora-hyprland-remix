@@ -1,22 +1,36 @@
 # Fedora Hyprland Remix — Live ISO Kickstart
 # Base: Fedora 44 | WM: Hyprland 0.55.x (COPR sdegler/hyprland)
-# Build: livemedia-creator --ks fedora-hyprland.ks --no-virt --project Fedora-Hyprland-Remix --releasever 44 --iso-only
+# Build: livecd-creator --config fedora-hyprland.ks --fslabel Fedora-Hyprland-Remix --cache /var/cache/live
 
 lang it_IT.UTF-8
 keyboard it
 timezone Europe/Rome --isUtc
 
 # ── Repositories ──────────────────────────────────────────────────────────────
-repo --name=fedora --baseurl=https://dl.fedoraproject.org/pub/fedora/linux/releases/44/Everything/x86_64/os/ --gpgcheck=1
-repo --name=updates --baseurl=https://dl.fedoraproject.org/pub/fedora/linux/updates/44/Everything/x86_64/ --gpgcheck=1
-repo --name=rpmfusion-free --baseurl=https://mirrors.rpmfusion.org/free/fedora/releases/44/Everything/x86_64/os/ --gpgcheck=1
-repo --name=rpmfusion-nonfree --baseurl=https://mirrors.rpmfusion.org/nonfree/fedora/releases/44/Everything/x86_64/os/ --gpgcheck=1
-repo --name=hyprland --baseurl=https://download.copr.fedorainfracloud.org/results/sdegler/hyprland/fedora-44-x86_64/ --gpgcheck=1
+repo --name=fedora --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-44&arch=x86_64
+repo --name=updates --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f44&arch=x86_64
+repo --name=rpmfusion-free --metalink=https://mirrors.rpmfusion.org/metalink?repo=free-fedora-44&arch=x86_64
+repo --name=rpmfusion-nonfree --metalink=https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-44&arch=x86_64
+repo --name=hyprland --baseurl=https://download.copr.fedorainfracloud.org/results/sdegler/hyprland/fedora-44-x86_64/
 
 # ── Packages ──────────────────────────────────────────────────────────────────
 %packages
 @core
 @standard
+
+# ── Live environment ──────────────────────────────────────────────────────────
+@livecd-tools
+anaconda-dracut
+dracut-config-generic
+kernel
+grub2-efi-x64
+grub2-efi-x64-modules
+shim-x64
+efibootmgr
+syslinux
+memtest86+
+plymouth
+plymouth-theme-spinner
 
 # ── Desktop: Hyprland ─────────────────────────────────────────────────────────
 hyprland
@@ -112,26 +126,6 @@ podman-compose
 
 # ── Themes (pacchetti repo) ───────────────────────────────────────────────────
 papirus-icon-theme
-
-# ── Live environment ──────────────────────────────────────────────────────────
-plymouth
-plymouth-theme-spinner
-%end
-
-# ── Copy build files into chroot ──────────────────────────────────────────────
-%post --nochroot --log=/root/ks-post-nochroot.log
-set -euo pipefail
-
-BUILD_DIR="/tmp/fedora-hyprland-remix-build"
-
-if [ -d "${BUILD_DIR}" ]; then
-    cp -a "${BUILD_DIR}/config" "${INSTALL_ROOT}/tmp/ks-config"
-    cp -a "${BUILD_DIR}/scripts" "${INSTALL_ROOT}/tmp/ks-scripts"
-    cp -a "${BUILD_DIR}/units" "${INSTALL_ROOT}/tmp/ks-units"
-    echo "Build files copied to chroot"
-else
-    echo "WARNING: Build directory ${BUILD_DIR} not found"
-fi
 %end
 
 # ── Post-install ──────────────────────────────────────────────────────────────
@@ -199,14 +193,45 @@ chmod +x /tmp/papirus-folders
 rm -f /tmp/papirus-folders
 
 # ── Copy dotfiles to /etc/skel ────────────────────────────────────────────────
-mkdir -p /etc/skel
-cp -a /tmp/ks-config/common/.config /etc/skel/
-cp -a /tmp/ks-config/common/.local /etc/skel/
-cp /tmp/ks-config/common/.bashrc /etc/skel/
-cp /tmp/ks-config/common/.bash_profile /etc/skel/
-cp /tmp/ks-config/common/.bash_aliases /etc/skel/
-cp /tmp/ks-config/common/.nanorc /etc/skel/
-cp -a /tmp/ks-config/hyprland/.config /etc/skel/
+mkdir -p /etc/skel/.config
+mkdir -p /etc/skel/.local/bin
+mkdir -p /etc/skel/.local/share/wallpapers
+
+# bash config
+cat > /etc/skel/.bashrc << 'BASHRC'
+# ~/.bashrc
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+# Prompt
+PS1='[\u@\h \W]\$ '
+
+# Aliases
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+BASHRC
+
+cat > /etc/skel/.bash_profile << 'BASHPROFILE'
+# ~/.bash_profile
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+BASHPROFILE
+
+cat > /etc/skel/.bash_aliases << 'BASHALIAS'
+# Custom aliases
+alias ll='ls -la --color=auto'
+alias la='ls -A --color=auto'
+BASHALIAS
+
+cat > /etc/skel/.nanorc << 'NANORC'
+set linenumbers
+set tabsize 4
+set autoindent
+NANORC
 
 # ── Create liveuser ──────────────────────────────────────────────────────────
 useradd -m -c "Live User" -s /bin/bash liveuser
@@ -231,13 +256,84 @@ systemctl enable firewalld
 
 # ── First-login setup script ─────────────────────────────────────────────────
 mkdir -p /usr/share/fedora-hyprland-remix
-cp /tmp/ks-scripts/first-login-setup.sh /usr/bin/first-login-setup.sh
+
+cat > /usr/bin/first-login-setup.sh << 'FIRSTLOGIN'
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR=/usr/share/fedora-hyprland-remix
+
+flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+while IFS= read -r app; do
+    flatpak install --user --noninteractive flathub "$app"
+done < "${SCRIPT_DIR}/flatpak-apps.txt"
+
+flatpak override --user --filesystem=/usr/share/themes:ro
+flatpak override --user --filesystem=/usr/share/icons:ro
+flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+
+gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-blue-standard+default'
+gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
+gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-dark-cursors'
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+
+while IFS= read -r ext; do
+    code --install-extension "$ext"
+done < "${SCRIPT_DIR}/vscode-extensions.txt"
+
+curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL https://mise.run | sh
+curl -fsSL https://opencode.ai/install | sh
+~/.local/bin/mise use --global ansible glab
+
+notify-send "Fedora Hyprland Remix" "Configurazione Terminata" --icon=system-software-install
+FIRSTLOGIN
 chmod 755 /usr/bin/first-login-setup.sh
-cp /tmp/ks-scripts/flatpak-apps.txt /usr/share/fedora-hyprland-remix/
-cp /tmp/ks-scripts/vscode-extensions.txt /usr/share/fedora-hyprland-remix/
+
+cat > /usr/share/fedora-hyprland-remix/flatpak-apps.txt << 'FLATPAK'
+org.libreoffice.LibreOffice
+org.videolan.VLC
+com.obsproject.Studio
+com.spotify.Client
+com.usebruno.Bruno
+org.telegram.desktop
+com.brave.Browser
+io.gitlab.librewolf-community
+org.mozilla.Thunderbird
+nz.mega.MEGAsync
+FLATPAK
+
+cat > /usr/share/fedora-hyprland-remix/vscode-extensions.txt << 'VSEXT'
+Catppuccin.catppuccin-vsc
+PKief.material-icon-theme
+eamodio.gitlens
+mhutchie.git-graph
+usernamehw.errorlens
+alefragnani.project-manager
+redhat.ansible
+esbenp.prettier-vscode
+adpyke.codesnap
+formulahendry.code-runner
+yzhang.markdown-all-in-one
+chrmarti.regex
+ms-vscode-remote.remote-containers
+VSEXT
 
 mkdir -p /usr/lib/systemd/user
-cp /tmp/ks-units/first-login-setup.service /usr/lib/systemd/user/
+cat > /usr/lib/systemd/user/first-login-setup.service << 'UNIT'
+[Unit]
+Description=First login setup for Fedora Hyprland Remix
+ConditionPathExists=!%h/.config/fedora-hyprland-remix/.first-login-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/first-login-setup.sh
+ExecStartPost=/bin/bash -c 'mkdir -p %h/.config/fedora-hyprland-remix && touch %h/.config/fedora-hyprland-remix/.first-login-done'
+
+[Install]
+WantedBy=default.target
+UNIT
 systemctl --global enable first-login-setup.service
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────

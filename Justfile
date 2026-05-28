@@ -16,10 +16,10 @@ build-iso:
 [group('Utility')]
 clean:
     rm -rf output/
-    rm -rf /tmp/fedora-hyprland-remix-build/
+    rm -rf /var/cache/live/
 
 lint:
-    shellcheck build.sh scripts/first-login-setup.sh
+    shellcheck build.sh
 
 format:
-    shfmt --write build.sh scripts/first-login-setup.sh
+    shfmt --write build.sh

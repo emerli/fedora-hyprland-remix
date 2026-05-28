@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Build Fedora Hyprland Remix Live ISO
-# Requires: root, livemedia-creator, pykickstart
+# Requires: root, livecd-tools
 # Run on: Fedora 44 (or compatible)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="/tmp/fedora-hyprland-remix-build"
 OUTPUT_DIR="${SCRIPT_DIR}/output"
 FEDORA_RELEASE="${FEDORA_RELEASE:-44}"
 ISO_NAME="Fedora-Hyprland-Remix-${FEDORA_RELEASE}.iso"
@@ -18,41 +17,27 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 
 # ── Check dependencies ────────────────────────────────────────────────────────
-for cmd in livemedia-creator pykickstart dnf; do
+for cmd in livecd-creator; do
     if ! command -v "${cmd}" &>/dev/null; then
-        echo "Error: '${cmd}' not found. Install with: dnf install lorax pykickstart" >&2
+        echo "Error: '${cmd}' not found. Install with: dnf install livecd-tools" >&2
         exit 1
     fi
 done
 
-# ── Prepare build directory ───────────────────────────────────────────────────
-echo ">>> Preparing build directory..."
-rm -rf "${BUILD_DIR}"
-mkdir -p "${BUILD_DIR}"
-cp -a "${SCRIPT_DIR}/config" "${BUILD_DIR}/"
-cp -a "${SCRIPT_DIR}/scripts" "${BUILD_DIR}/"
-cp -a "${SCRIPT_DIR}/units" "${BUILD_DIR}/"
-
 # ── Prepare output directory ──────────────────────────────────────────────────
 mkdir -p "${OUTPUT_DIR}"
+mkdir -p /var/cache/live
 
 # ── Build ISO ─────────────────────────────────────────────────────────────────
 echo ">>> Building Live ISO (Fedora ${FEDORA_RELEASE})..."
 echo ">>> ISO will be saved to: ${OUTPUT_DIR}/${ISO_NAME}"
 
-livemedia-creator \
-    --ks "${SCRIPT_DIR}/fedora-hyprland.ks" \
-    --no-virt \
-    --project "Fedora-Hyprland-Remix" \
-    --releasever "${FEDORA_RELEASE}" \
-    --iso-only \
-    --iso-name "${ISO_NAME}" \
-    --resultdir "${OUTPUT_DIR}" \
-    --ram 4096 \
-    --vcpus 4
+livecd-creator \
+    --config "${SCRIPT_DIR}/fedora-hyprland.ks" \
+    --fslabel "Fedora-Hyprland-Remix-${FEDORA_RELEASE}" \
+    --cache /var/cache/live
+
+mv -f "${ISO_NAME}" "${OUTPUT_DIR}/"
 
 echo ">>> Build complete: ${OUTPUT_DIR}/${ISO_NAME}"
-
-# ── Cleanup ───────────────────────────────────────────────────────────────────
-rm -rf "${BUILD_DIR}"
 echo ">>> Done."
