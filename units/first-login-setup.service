@@ -1,0 +1,11 @@
+[Unit]
+Description=First login setup for Fedora Hyprland Remix
+ConditionPathExists=!%h/.config/fedora-hyprland-remix/.first-login-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/first-login-setup.sh
+ExecStartPost=/bin/bash -c 'mkdir -p %h/.config/fedora-hyprland-remix && touch %h/.config/fedora-hyprland-remix/.first-login-done'
+
+[Install]
+WantedBy=default.target

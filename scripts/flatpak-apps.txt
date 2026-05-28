@@ -1,0 +1,10 @@
+org.libreoffice.LibreOffice
+org.videolan.VLC
+com.obsproject.Studio
+com.spotify.Client
+com.usebruno.Bruno
+org.telegram.desktop
+com.brave.Browser
+io.gitlab.librewolf-community
+org.mozilla.Thunderbird
+nz.mega.MEGAsync

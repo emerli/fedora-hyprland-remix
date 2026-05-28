@@ -1,0 +1,48 @@
+# Mako notification config — openSUSE Tumbleweed style
+# Colori ispirati alla palette ufficiale openSUSE + Breeze Dark
+
+# Posizione e dimensioni
+anchor=top-right
+margin=12
+padding=12,16
+width=360
+height=150
+border-size=2
+border-radius=8
+
+# Colori base (Breeze Dark / openSUSE)
+background-color=#1e2229ee
+text-color=#eff0f1
+border-color=#73ba25cc
+
+# Tipografia
+font=JetBrains Mono 11
+
+# Comportamento
+default-timeout=5000
+ignore-timeout=0
+max-visible=5
+sort=-time
+
+# Icone
+icons=1
+icon-path=/usr/share/icons/breeze-dark
+max-icon-size=64
+
+# Formato
+format=<b>%s</b>\n%b
+markup=1
+
+[urgency=low]
+border-color=#4d5057cc
+default-timeout=3000
+
+[urgency=normal]
+border-color=#73ba25cc
+default-timeout=5000
+
+[urgency=critical]
+border-color=#da4453ff
+background-color=#2a1a1aee
+text-color=#ffffff
+default-timeout=0

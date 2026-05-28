@@ -1,0 +1,33 @@
+{
+  "workbench.colorTheme": "Dracula Theme From IntelliJ",
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.fontFamily": "JetBrainsMono Nerd Font, monospace",
+  "editor.fontSize": 14,
+  "editor.fontLigatures": true,
+  "editor.minimap.enabled": false,
+  "breadcrumbs.enabled": false,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.smoothScrolling": true,
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "workbench.startupEditor": "none",
+  "workbench.tips.enabled": false,
+  "telemetry.telemetryLevel": "off",
+  "update.mode": "none",
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "github.copilot.enable": {
+    "*": false
+  },
+  "workbench.enableExperiments": false,
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font",
+  "terminal.integrated.fontSize": 14,
+  "dev.containers.dockerPath": "podman",
+  "dev.containers.dockerComposePath": "podman-compose"
+}

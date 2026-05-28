@@ -1,0 +1,90 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 40,
+    "margin-top": 6,
+    "margin-left": 10,
+    "margin-right": 10,
+    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["custom/clock"],
+    "modules-right": ["cpu", "memory", "temperature", "tray", "pulseaudio", "battery", "custom/power"],
+    "hyprland/workspaces": {
+        "all-outputs": false,
+        "disable-scroll": true,
+        "format": "{icon}",
+        "format-icons": {
+            "1": "\uf086",
+            "2": "\uf0ac",
+            "3": "\uf120",
+            "4": "\uf121",
+            "5": "\uf07b",
+            "6": "○",
+            "7": "○",
+            "8": "\uf0e0",
+            "9": "\uf001",
+            "10": "\uf0ac",
+            "urgent": "\uf071",
+            "default": "\uf10c"
+        },
+        "persistent-workspaces": {
+            "*": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        }
+    },
+    "hyprland/window": {
+        "max-length": 60,
+        "tooltip": false,
+        "format": "  {}"
+    },
+    "custom/clock": {
+        "exec": "LC_TIME=it_IT.utf8 date '+%a %d %B %H:%M'",
+        "interval": 10,
+        "tooltip": false
+    },
+    "pulseaudio": {
+        "format": "{icon}",
+        "format-muted": "\uf026",
+        "format-icons": {
+            "headphone": "\uf025",
+            "default": ["\uf027", "\uf028", "\uf028"]
+        },
+        "on-click": "pavucontrol",
+        "tooltip": false
+    },
+    "cpu": {
+        "format": "\uf2db {usage}%",
+        "tooltip": false,
+        "interval": 2
+    },
+    "memory": {
+        "format": "\uf538 {used:0.1f}G",
+        "interval": 2,
+        "tooltip": false
+    },
+    "temperature": {
+        "hwmon-path": "/sys/class/hwmon/hwmon5/temp1_input",
+        "critical-threshold": 80,
+        "format": "\uf2c9 {temperatureC}°C",
+        "format-critical": "\uf769 {temperatureC}°C",
+        "interval": 5,
+        "tooltip": false
+    },
+    "tray": {
+        "spacing": 8,
+        "icon-size": 16
+    },
+    "custom/power": {
+        "format": "\uf011",
+        "tooltip": false,
+        "on-click": "wlogout"
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-charging": "{capacity}% \uf0e7",
+        "format-plugged": "{capacity}% \uf1e6",
+        "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"]
+    }
+}

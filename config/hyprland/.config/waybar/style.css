@@ -1,0 +1,191 @@
+/* hypr-blue Waybar Theme */
+/* Fedora Blue Dark — ispirato ai colori ufficiali Fedora */
+/* Blu primario: #3c6eb4 | Blu scuro: #0e3b74 | Blu chiaro: #60a0e0 */
+
+* {
+    border:        none;
+    border-radius: 0;
+    font-family:   "JetBrainsMono Nerd Font Mono", "JetBrainsMono Nerd Font", "Font Awesome 6 Free", "Font Awesome 6 Brands", monospace;
+    font-size:     13px;
+    box-shadow:    none;
+    text-shadow:   none;
+    transition-duration: 0.2s;
+}
+
+window#waybar {
+    background-color: rgba(8, 18, 32, 0.88);
+    border-radius:    14px;
+    border:           1px solid rgba(60, 110, 180, 0.30);
+    color:            #c8d8f0;
+}
+
+/* ── Left ─────────────────────────────────────────── */
+
+#workspaces {
+    margin:        0 4px;
+    padding:       0 4px;
+    border-radius: 10px;
+    background:    rgba(60, 110, 180, 0.10);
+    border:        1px solid rgba(60, 110, 180, 0.15);
+}
+
+#workspaces button {
+    padding:       0 5px;
+    color:         rgba(96, 160, 224, 0.40);
+    background:    transparent;
+    border-radius: 8px;
+    min-width:     24px;
+}
+
+#workspaces button label {
+    font-size: 22px;
+}
+
+#workspaces button:hover {
+    background: rgba(60, 110, 180, 0.20);
+    color:      #60a0e0;
+}
+
+#workspaces button.active {
+    color:       #a8d8ff;
+    font-weight: bold;
+    background:  rgba(60, 110, 180, 0.18);
+}
+
+#workspaces button.active label {
+    text-decoration: underline;
+}
+
+#workspaces button.urgent {
+    color:      #ee4444;
+    background: rgba(238, 68, 68, 0.18);
+}
+
+#window {
+    color:      rgba(200, 216, 240, 0.75);
+    padding:    0 8px;
+    font-style: italic;
+}
+
+/* ── Center ───────────────────────────────────────── */
+
+#custom-clock {
+    color:         #60a0e0;
+    font-weight:   bold;
+    padding:       0 14px;
+    border-radius: 10px;
+    background:    rgba(60, 110, 180, 0.12);
+    border:        1px solid rgba(60, 110, 180, 0.25);
+}
+
+/* ── Right ────────────────────────────────────────── */
+
+/* Vitals group — pill unica */
+#cpu,
+#memory,
+#temperature {
+    background: rgba(60, 110, 180, 0.10);
+    padding:    0 8px;
+    margin:     0;
+}
+
+#cpu {
+    color:         #60a0e0;
+    border-radius: 8px 0 0 8px;
+    padding-left:  8px;
+    padding-right: 4px;
+}
+
+#cpu.high {
+    color: #f0a500;
+}
+
+#memory {
+    color:   #88bce8;
+    padding: 0 4px;
+}
+
+#temperature {
+    color:         #3c6eb4;
+    border-radius: 0 8px 8px 0;
+    padding-left:  4px;
+    padding-right: 8px;
+    margin-right:  10px;
+}
+
+#temperature.critical {
+    color:      #ee4444;
+    background: rgba(238, 68, 68, 0.18);
+}
+
+/* Battery */
+#battery {
+    color:   #60a0e0;
+    padding: 0 8px;
+}
+
+#battery.charging {
+    color: #88cc88;
+}
+
+#battery.plugged {
+    color: #88bce8;
+}
+
+#battery.warning:not(.charging) {
+    color: #f0a500;
+}
+
+#battery.critical:not(.charging) {
+    color:      #ee4444;
+    background: rgba(238, 68, 68, 0.18);
+    border-radius: 8px;
+    animation-name:     blink;
+    animation-duration: 1s;
+    animation-timing-function: steps(12);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    to { color: rgba(238, 68, 68, 0.4); }
+}
+
+/* Tray e pulseaudio */
+#tray {
+    color:       #60a0e0;
+    padding:     0 8px;
+    margin-left: 6px;
+}
+
+#pulseaudio {
+    color:   #60a0e0;
+    padding: 0 6px;
+}
+
+#pulseaudio.muted {
+    color: rgba(96, 160, 224, 0.35);
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect:  highlight;
+    background-color:  rgba(240, 165, 0, 0.18);
+    border-radius:     8px;
+}
+
+/* Power */
+#custom-power {
+    color:       #ee4444;
+    padding:     0 12px;
+    font-size:   16px;
+    margin-left: 4px;
+}
+
+#custom-power:hover {
+    background:    rgba(238, 68, 68, 0.15);
+    border-radius: 8px;
+}

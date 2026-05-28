@@ -1,0 +1,8 @@
+output/
+*.iso
+*.qcow2
+*.raw
+_build*
+previous.manifest.json
+changelog.md
+output.env
